@@ -42,17 +42,6 @@ class _MovieListScreenState extends State<MovieListScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Now Playing Movies'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.clear),
-            onPressed: () {
-              _searchController.clear();
-              setState(() {
-                _allMovies = [];
-              });
-            },
-          ),
-        ],
         bottom: PreferredSize(
           preferredSize: Size.fromHeight(kToolbarHeight + 10),
           child: Padding(
@@ -66,7 +55,7 @@ class _MovieListScreenState extends State<MovieListScreen> {
               },
               decoration: InputDecoration(
                 hintText: 'Search by movie title...',
-                prefixIcon: Icon(Icons.search),
+                prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
                 ),
@@ -104,14 +93,15 @@ class _MovieListScreenState extends State<MovieListScreen> {
       itemBuilder: (context, index) {
         final movie = moviesToDisplay[index];
         return ListTile(
+          tileColor: Colors.orangeAccent,
           title: Column(
             children: [
               Row(
                 children: [
                   Image.network(
                     'https://image.tmdb.org/t/p/w342/${movie.posterPath}',
-                    width: 70,
-                    height: 100,
+                    width: 17.w,
+                    height: 20.h,
                     fit: BoxFit.cover,
                   ),
                   Column(
@@ -123,7 +113,12 @@ class _MovieListScreenState extends State<MovieListScreen> {
                       ),
                       SizedBox(
                         height: 2.h,
-                      )
+                      ),
+                      SizedBox(
+                          width: 70.w,
+                          child: Text(
+                            movie.overview,
+                          ))
                     ],
                   ),
                 ],
