@@ -15,6 +15,7 @@ class _MovieListScreenState extends State<MovieListScreen> {
   late Future<List<Movie>> _moviesFuture;
   late TextEditingController _searchController = TextEditingController();
   late List<Movie> _allMovies;
+  bool _isSearching = false;
   @override
   void initState() {
     super.initState();
@@ -40,26 +41,63 @@ class _MovieListScreenState extends State<MovieListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.orangeAccent,
       appBar: AppBar(
-        title: Text('Now Playing Movies'),
+        backgroundColor: Colors.orangeAccent,
         bottom: PreferredSize(
-          preferredSize: Size.fromHeight(kToolbarHeight + 10),
+          preferredSize: _isSearching
+              ? Size.fromHeight(kToolbarHeight + 10)
+              : Size.fromHeight(kToolbarHeight),
           child: Padding(
             padding: const EdgeInsets.all(8.0),
-            child: TextField(
-              controller: _searchController,
-              onChanged: (value) {
-                setState(() {
-                  _allMovies = _filterMovies(value);
-                });
-              },
-              decoration: InputDecoration(
-                hintText: 'Search by movie title...',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: AnimatedContainer(
+                      decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8.0)),
+                      duration: Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                      width: _isSearching ? 40.0 : kToolbarHeight,
+                      child: TextField(
+                        controller: _searchController,
+                        textAlignVertical: TextAlignVertical.center,
+                        onTap: () {
+                          setState(() {
+                            _isSearching = true;
+                          });
+                        },
+                        onChanged: (value) {
+                          setState(() {
+                            // Your filtering logic here
+                            //_allMovies = _filterMovies(value);
+                          });
+                        },
+                        decoration: InputDecoration(
+                          hintText: 'Search',
+                          prefixIcon: Icon(Icons.search),
+                          prefixIconConstraints: BoxConstraints(
+                            minWidth: 0,
+                            minHeight: 0,
+                          ),
+                          contentPadding: EdgeInsets.symmetric(vertical: 8.0),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                        ),
+                      )),
                 ),
-              ),
+                if (_isSearching)
+                  ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          _searchController.clear();
+                          _isSearching = false;
+                        });
+                      },
+                      child: Text("Cancel"))
+              ],
             ),
           ),
         ),
@@ -92,38 +130,43 @@ class _MovieListScreenState extends State<MovieListScreen> {
       itemCount: moviesToDisplay.length,
       itemBuilder: (context, index) {
         final movie = moviesToDisplay[index];
-        return ListTile(
-          tileColor: Colors.orangeAccent,
-          title: Column(
-            children: [
-              Row(
-                children: [
-                  Image.network(
-                    'https://image.tmdb.org/t/p/w342/${movie.posterPath}',
-                    width: 17.w,
-                    height: 20.h,
-                    fit: BoxFit.cover,
-                  ),
-                  Column(
-                    children: [
-                      Text(
-                        movie.title,
-                        style: TextStyle(
-                            fontSize: 15.sp, fontWeight: FontWeight.w700),
-                      ),
-                      SizedBox(
-                        height: 2.h,
-                      ),
-                      SizedBox(
-                          width: 70.w,
-                          child: Text(
-                            movie.overview,
-                          ))
-                    ],
-                  ),
-                ],
-              )
-            ],
+        return GestureDetector(
+          onTap: () {
+
+          },
+          child: ListTile(
+            tileColor: Colors.orangeAccent,
+            title: Column(
+              children: [
+                Row(
+                  children: [
+                    Image.network(
+                      'https://image.tmdb.org/t/p/w342/${movie.posterPath}',
+                      width: 17.w,
+                      height: 20.h,
+                      fit: BoxFit.cover,
+                    ),
+                    Column(
+                      children: [
+                        Text(
+                          movie.title,
+                          style: TextStyle(
+                              fontSize: 15.sp, fontWeight: FontWeight.w700),
+                        ),
+                        SizedBox(
+                          height: 2.h,
+                        ),
+                        SizedBox(
+                            width: 70.w,
+                            child: Text(
+                              movie.overview,
+                            ))
+                      ],
+                    ),
+                  ],
+                )
+              ],
+            ),
           ),
         );
         // return ListTile(tileColor: Colors.orangeAccent,

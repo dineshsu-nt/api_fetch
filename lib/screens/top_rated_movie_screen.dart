@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:api_fetch/model/movie_model.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:sizer/sizer.dart';
 
 class TopRatedMovies extends StatefulWidget {
   const TopRatedMovies({Key? key}) : super(key: key);
@@ -12,6 +13,9 @@ class TopRatedMovies extends StatefulWidget {
 
 class _TopRatedMoviesState extends State<TopRatedMovies> {
   late Future<List<Movie>> _moviesFuture;
+  late TextEditingController _searchController = TextEditingController();
+  late List<Movie> _allMovies;
+  bool _isSearching = false;
 
   @override
   void initState() {
@@ -38,8 +42,66 @@ class _TopRatedMoviesState extends State<TopRatedMovies> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.orangeAccent,
       appBar: AppBar(
-        title: Text('Top Rated Movies'),
+        backgroundColor: Colors.orangeAccent,
+        bottom: PreferredSize(
+          preferredSize: _isSearching
+              ? Size.fromHeight(kToolbarHeight + 10)
+              : Size.fromHeight(kToolbarHeight),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: AnimatedContainer(
+                      decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8.0)),
+                      duration: Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                      width: _isSearching ? 40.0 : kToolbarHeight,
+                      child: TextField(
+                        controller: _searchController,
+                        textAlignVertical: TextAlignVertical.center,
+                        onTap: () {
+                          setState(() {
+                            _isSearching = true;
+                          });
+                        },
+                        onChanged: (value) {
+                          setState(() {
+                            // Your filtering logic here
+                            //_allMovies = _filterMovies(value);
+                          });
+                        },
+                        decoration: InputDecoration(
+                          hintText: 'Search',
+                          prefixIcon: Icon(Icons.search),
+                          prefixIconConstraints: BoxConstraints(
+                            minWidth: 0,
+                            minHeight: 0,
+                          ),
+                          contentPadding: EdgeInsets.symmetric(vertical: 8.0),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                        ),
+                      )),
+                ),
+                if (_isSearching)
+                  ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          _searchController.clear();
+                          _isSearching = false;
+                        });
+                      },
+                      child: Text("Cancel"))
+              ],
+            ),
+          ),
+        ),
       ),
       body: FutureBuilder<List<Movie>>(
         future: _moviesFuture,
@@ -53,23 +115,87 @@ class _TopRatedMoviesState extends State<TopRatedMovies> {
               snapshot.data!.isEmpty) {
             return Center(child: Text('No movies available'));
           } else {
-            // Data fetched successfully, display it
-            final movies = snapshot.data!;
-
-            return ListView.builder(
-              itemCount: movies.length,
-              itemBuilder: (context, index) {
-                final movie = movies[index];
-                return ListTile(
-                  title: Text(movie.title),
-                  subtitle: Text(movie.overview),
-                  // You can display more information about the movie here
-                );
-              },
-            );
+            _allMovies = snapshot.data!;
+            return _buildMovieList();
           }
         },
       ),
     );
+  }
+
+  Widget _buildMovieList() {
+    final moviesToDisplay = _searchController.text.isEmpty
+        ? _allMovies
+        : _filterMovies(_searchController.text);
+    return ListView.builder(
+      itemCount: moviesToDisplay.length,
+      itemBuilder: (context, index) {
+        final movie = moviesToDisplay[index];
+        return GestureDetector(
+          onTap: () {},
+          child: ListTile(
+            tileColor: Colors.orangeAccent,
+            title: Column(
+              children: [
+                Row(
+                  children: [
+                    Image.network(
+                      'https://image.tmdb.org/t/p/w342/${movie.posterPath}',
+                      width: 17.w,
+                      height: 20.h,
+                      fit: BoxFit.cover,
+                    ),
+                    Column(
+                      children: [
+                        Text(
+                          movie.title,
+                          style: TextStyle(
+                              fontSize: 15.sp, fontWeight: FontWeight.w700),
+                        ),
+                        SizedBox(
+                          height: 2.h,
+                        ),
+                        SizedBox(
+                            width: 70.w,
+                            child: Text(
+                              movie.overview,
+                            ))
+                      ],
+                    ),
+                  ],
+                )
+              ],
+            ),
+          ),
+        );
+        // return ListTile(tileColor: Colors.orangeAccent,
+        //   title: Text(movie.title,style: TextStyle(fontSize: 15.sp,fontWeight: FontWeight.w700),),
+        //   subtitle: Text(movie.overview),
+        //   leading: ClipRRect(
+        //     borderRadius: BorderRadius.circular(8.0),
+        //     child: Image.network(
+        //       'https://image.tmdb.org/t/p/w342/${movie.posterPath}',
+        //       width: 70,
+        //       height: 100,
+        //       fit: BoxFit.cover,
+        //     ),
+        //   ),
+        //   // trailing: Image.network(
+        //   //   'https://image.tmdb.org/t/p/original/${movie.backdropPath}',
+        //   //   width: 100,
+        //   //   height: 100,
+        //   //   fit: BoxFit.cover,
+        //   // ),
+        // );
+      },
+    );
+  }
+
+  List<Movie> _filterMovies(String query) {
+    return _allMovies.where((movie) {
+      final title = movie.title.toLowerCase();
+      final searchLower = query.toLowerCase();
+      return title.contains(searchLower);
+    }).toList();
   }
 }
