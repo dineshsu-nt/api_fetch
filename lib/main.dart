@@ -83,7 +83,8 @@ class MovieListScreen extends StatefulWidget {
 
 class _MovieListScreenState extends State<MovieListScreen> {
   late Future<List<Movie>> _moviesFuture;
-
+  late TextEditingController _searchController = TextEditingController();
+  late List<Movie> _allMovies;
   @override
   void initState() {
     super.initState();
@@ -111,6 +112,38 @@ class _MovieListScreenState extends State<MovieListScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Now Playing Movies'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.clear),
+            onPressed: () {
+              _searchController.clear();
+              setState(() {
+                _allMovies = [];
+              });
+            },
+          ),
+        ],
+        bottom: PreferredSize(
+          preferredSize: Size.fromHeight(kToolbarHeight + 10),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              controller: _searchController,
+              onChanged: (value) {
+                setState(() {
+                  _allMovies = _filterMovies(value);
+                });
+              },
+              decoration: InputDecoration(
+                hintText: 'Search by movie title...',
+                prefixIcon: Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
       body: FutureBuilder<List<Movie>>(
         future: _moviesFuture,
@@ -124,24 +157,51 @@ class _MovieListScreenState extends State<MovieListScreen> {
               snapshot.data!.isEmpty) {
             return Center(child: Text('No movies available'));
           } else {
-            // Data fetched successfully, display it
-            final movies = snapshot.data!;
-
-            return ListView.builder(
-              itemCount: movies.length,
-              itemBuilder: (context, index) {
-                final movie = movies[index];
-                return ListTile(
-                  title: Text(movie.title),
-                  subtitle: Text(movie.overview),
-                  // You can display more information about the movie here
-                );
-              },
-            );
+            _allMovies = snapshot.data!;
+            return _buildMovieList();
           }
         },
       ),
     );
+  }
+
+  Widget _buildMovieList() {
+    final moviesToDisplay = _searchController.text.isEmpty
+        ? _allMovies
+        : _filterMovies(_searchController.text);
+    return ListView.builder(
+      itemCount: moviesToDisplay.length,
+      itemBuilder: (context, index) {
+        final movie = moviesToDisplay[index];
+        return ListTile(
+          title: Text(movie.title),
+          subtitle: Text(movie.overview),
+          leading: ClipRRect(
+            borderRadius: BorderRadius.circular(8.0),
+            child: Image.network(
+              'https://image.tmdb.org/t/p/w342/${movie.posterPath}',
+              width: 50,
+              height: 50,
+              fit: BoxFit.cover,
+            ),
+          ),
+          trailing: Image.network(
+            'https://image.tmdb.org/t/p/original/${movie.backdropPath}',
+            width: 100,
+            height: 100,
+            fit: BoxFit.cover,
+          ),
+        );
+      },
+    );
+  }
+
+  List<Movie> _filterMovies(String query) {
+    return _allMovies.where((movie) {
+      final title = movie.title.toLowerCase();
+      final searchLower = query.toLowerCase();
+      return title.contains(searchLower);
+    }).toList();
   }
 }
 
