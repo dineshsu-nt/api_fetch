@@ -25,7 +25,7 @@ class CustomMovieTile extends StatelessWidget {
               Image.network(
                 'https://image.tmdb.org/t/p/w342/$posterPath',
                 width: 20.w,
-                height: 15.h,
+                height: 12.5.h,
                 fit: BoxFit.cover,
               ),
               Padding(
@@ -54,14 +54,15 @@ class CustomMovieTile extends StatelessWidget {
                         style: TextStyle(fontSize: 10.sp),
                       ),
                     ),
-                    Divider(
-                      thickness: 0.5.h,
-                      color: Colors.orange,
-                    )
+
                   ],
                 ),
               ),
             ],
+          ),
+          Divider(indent: 0,
+            thickness: 0.2.h,
+            color: Colors.orange,
           )
         ],
       ),
