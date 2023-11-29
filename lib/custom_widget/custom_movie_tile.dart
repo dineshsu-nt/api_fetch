@@ -25,7 +25,7 @@ class CustomMovieTile extends StatelessWidget {
               Image.network(
                 'https://image.tmdb.org/t/p/w342/$posterPath',
                 width: 20.w,
-                height: 13.h,
+                height: 15.h,
                 fit: BoxFit.cover,
               ),
               Padding(
