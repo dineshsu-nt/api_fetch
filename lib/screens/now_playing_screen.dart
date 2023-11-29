@@ -1,8 +1,11 @@
 import 'dart:convert';
+import 'package:api_fetch/custom_widget/custom_movie_tile.dart';
+import 'package:api_fetch/custom_widget/route-animation.dart';
 import 'package:http/http.dart' as http;
 import 'package:api_fetch/model/movie_model.dart';
 import 'package:flutter/material.dart';
-import 'package:sizer/sizer.dart';
+
+import 'movie_info_screen.dart';
 
 class MovieListScreen extends StatefulWidget {
   const MovieListScreen({super.key});
@@ -46,8 +49,8 @@ class _MovieListScreenState extends State<MovieListScreen> {
         backgroundColor: Colors.orangeAccent,
         bottom: PreferredSize(
           preferredSize: _isSearching
-              ? Size.fromHeight(kToolbarHeight + 10)
-              : Size.fromHeight(kToolbarHeight),
+              ? const Size.fromHeight(kToolbarHeight + 10)
+              : const Size.fromHeight(kToolbarHeight),
           child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: Row(
@@ -89,7 +92,7 @@ class _MovieListScreenState extends State<MovieListScreen> {
                       )),
                 ),
                 if (_isSearching)
-                  ElevatedButton(
+                  TextButton(
                       onPressed: () {
                         setState(() {
                           _searchController.clear();
@@ -132,62 +135,22 @@ class _MovieListScreenState extends State<MovieListScreen> {
         final movie = moviesToDisplay[index];
         return GestureDetector(
           onTap: () {
-
+            Navigator.of(context).push(
+              AnimatedRoute().createRoute(
+                MovieInfoScreen(
+                    id: movie.id.toString(),
+                    releaseDate: movie.releaseDate,
+                    overView: movie.overview,
+                    title: movie.title,
+                    image: movie.posterPath),
+              ),
+            );
           },
-          child: ListTile(
-            tileColor: Colors.orangeAccent,
-            title: Column(
-              children: [
-                Row(
-                  children: [
-                    Image.network(
-                      'https://image.tmdb.org/t/p/w342/${movie.posterPath}',
-                      width: 17.w,
-                      height: 20.h,
-                      fit: BoxFit.cover,
-                    ),
-                    Column(
-                      children: [
-                        Text(
-                          movie.title,
-                          style: TextStyle(
-                              fontSize: 15.sp, fontWeight: FontWeight.w700),
-                        ),
-                        SizedBox(
-                          height: 2.h,
-                        ),
-                        SizedBox(
-                            width: 70.w,
-                            child: Text(
-                              movie.overview,
-                            ))
-                      ],
-                    ),
-                  ],
-                )
-              ],
-            ),
-          ),
+          child: CustomMovieTile(
+              posterPath: 'https://image.tmdb.org/t/p/w342/${movie.posterPath}',
+              title: movie.title,
+              overview: movie.overview),
         );
-        // return ListTile(tileColor: Colors.orangeAccent,
-        //   title: Text(movie.title,style: TextStyle(fontSize: 15.sp,fontWeight: FontWeight.w700),),
-        //   subtitle: Text(movie.overview),
-        //   leading: ClipRRect(
-        //     borderRadius: BorderRadius.circular(8.0),
-        //     child: Image.network(
-        //       'https://image.tmdb.org/t/p/w342/${movie.posterPath}',
-        //       width: 70,
-        //       height: 100,
-        //       fit: BoxFit.cover,
-        //     ),
-        //   ),
-        //   // trailing: Image.network(
-        //   //   'https://image.tmdb.org/t/p/original/${movie.backdropPath}',
-        //   //   width: 100,
-        //   //   height: 100,
-        //   //   fit: BoxFit.cover,
-        //   // ),
-        // );
       },
     );
   }

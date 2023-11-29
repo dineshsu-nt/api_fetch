@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'package:api_fetch/custom_widget/custom_movie_tile.dart';
 import 'package:api_fetch/model/movie_model.dart';
+import 'package:api_fetch/screens/movie_info_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:sizer/sizer.dart';
@@ -132,61 +134,24 @@ class _TopRatedMoviesState extends State<TopRatedMovies> {
       itemBuilder: (context, index) {
         final movie = moviesToDisplay[index];
         return GestureDetector(
-          onTap: () {},
-          child: ListTile(
-            tileColor: Colors.orangeAccent,
-            title: Column(
-              children: [
-                Row(
-                  children: [
-                    Image.network(
-                      'https://image.tmdb.org/t/p/w342/${movie.posterPath}',
-                      width: 17.w,
-                      height: 20.h,
-                      fit: BoxFit.cover,
-                    ),
-                    Column(
-                      children: [
-                        Text(
-                          movie.title,
-                          style: TextStyle(
-                              fontSize: 15.sp, fontWeight: FontWeight.w700),
-                        ),
-                        SizedBox(
-                          height: 2.h,
-                        ),
-                        SizedBox(
-                            width: 70.w,
-                            child: Text(
-                              movie.overview,
-                            ))
-                      ],
-                    ),
-                  ],
-                )
-              ],
-            ),
-          ),
-        );
-        // return ListTile(tileColor: Colors.orangeAccent,
-        //   title: Text(movie.title,style: TextStyle(fontSize: 15.sp,fontWeight: FontWeight.w700),),
-        //   subtitle: Text(movie.overview),
-        //   leading: ClipRRect(
-        //     borderRadius: BorderRadius.circular(8.0),
-        //     child: Image.network(
-        //       'https://image.tmdb.org/t/p/w342/${movie.posterPath}',
-        //       width: 70,
-        //       height: 100,
-        //       fit: BoxFit.cover,
-        //     ),
-        //   ),
-        //   // trailing: Image.network(
-        //   //   'https://image.tmdb.org/t/p/original/${movie.backdropPath}',
-        //   //   width: 100,
-        //   //   height: 100,
-        //   //   fit: BoxFit.cover,
-        //   // ),
-        // );
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => MovieInfoScreen(
+                    id: movie.id.toString(),
+                    title: movie.title,
+                    image: movie.posterPath,
+
+                  ),
+                ),
+              );
+            },
+            child: CustomMovieTile(
+                posterPath:
+                    'https://image.tmdb.org/t/p/w342/${movie.posterPath}',
+                title: movie.title,
+                overview: movie.overview));
       },
     );
   }
